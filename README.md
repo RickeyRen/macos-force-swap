@@ -1,4 +1,85 @@
+# macOS Force Swap Tool
+
+<div align="right">
+  <a href="#macos-force-swap-tool">English</a> | 
+  <a href="#macos-强制使用swap工具">中文</a>
+</div>
+
+This tool is specifically designed to bypass macOS memory compression optimization and force the use of swap files. Unlike ordinary memory allocation tools, this tool uses multiple techniques to ensure memory is actually written to swap files.
+
+## Compilation
+
+```bash
+gcc -o force_swap force_swap.c
+```
+
+## Usage
+
+```bash
+./force_swap [-p percentage] [-c chunk_size_mb] [-s sleep_interval] [-r rounds] [-l lock_enforce]
+```
+
+### Parameters
+
+- `-p percentage`: Percentage of physical memory to allocate (default: 300%)
+- `-c chunk_size_mb`: Size of each memory chunk allocation (MB) (default: 128MB)
+- `-s sleep_interval`: Sleep interval after each allocation (seconds) (default: 0 seconds)
+- `-r rounds`: Number of rounds for memory recycling and reallocation (default: 5 rounds)
+- `-l lock_enforce`: Whether to enable memory locking to prevent compression (default: 1 enabled)
+- `-h`: Display help information
+
+### Examples
+
+1. Use default parameters:
+   ```bash
+   ./force_swap
+   ```
+
+2. Allocate 200% of physical memory, 64MB each time, 3 rounds:
+   ```bash
+   ./force_swap -p 200 -c 64 -r 3
+   ```
+
+3. Allocate 400% of physical memory, disable locking, 10 rounds:
+   ```bash
+   ./force_swap -p 400 -l 0 -r 10
+   ```
+
+## Differences from Ordinary Memory Consumption Tools
+
+This tool is specifically designed to bypass macOS memory optimization mechanisms:
+
+1. **Using mmap instead of malloc**: More direct control over memory allocation
+2. **Random data filling**: Generate random data for each memory page to reduce compression efficiency
+3. **Forced page eviction**: Use MADV_PAGEOUT to actively evict pages to swap
+4. **Multiple rounds of allocation**: Increase the probability of swap usage by releasing and reallocating memory
+5. **Real-time monitoring**: Display real-time changes in swap usage
+
+## Technical Details
+
+The tool uses the following techniques to force swap usage:
+
+- **MAP_NORESERVE flag**: Tell the system not to reserve swap space
+- **madvise**: Use MADV_PAGEOUT to hint the system to move pages to swap
+- **Page-level random data**: Each memory page is filled with different random data to prevent memory compression from merging similar pages
+- **Memory locking**: Optionally use mlockall to prevent important memory from being swapped
+
+## Notes
+
+- This tool will cause the system to slow down significantly; make sure to save important work before using
+- Root privileges may be required to use certain memory management features
+- Heavy use of swap may lead to increased disk space usage
+- The program will automatically stop when it cannot allocate more memory
+- Press Enter to release all occupied memory and exit the program
+
+---
+
 # macOS 强制使用Swap工具
+
+<div align="right">
+  <a href="#macos-force-swap-tool">English</a> | 
+  <a href="#macos-强制使用swap工具">中文</a>
+</div>
 
 这是一个专门设计用于绕过macOS内存压缩优化，强制使用swap的工具。与普通内存分配工具不同，这个工具使用了多种技术确保内存真正写入swap文件。
 
